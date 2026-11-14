@@ -1,6 +1,6 @@
 {
   "name": "context-lens",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Pane: memory/CLAUDE.md load tree, harness-injected attachments, per-turn context growth",
   "types": "./types/index.d.ts",
   "license": "MIT",
