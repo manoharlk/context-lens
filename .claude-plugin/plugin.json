@@ -1,10 +1,20 @@
 {
   "name": "context-lens",
-  "version": "0.2.0",
-  "description": "Pane: memory/CLAUDE.md load tree, harness-injected attachments, per-turn context growth",
+  "version": "0.3.0",
+  "description": "Pane: live context breakdown + memory/CLAUDE.md load tree + injected attachments",
   "types": "./types/index.d.ts",
-  "license": "MIT",
-  "author": {
-    "name": "manoharlk"
+  "userConfig": {
+    "obsidianVault": {
+      "type": "string",
+      "title": "Obsidian vault path",
+      "description": "Absolute path of an Obsidian vault. Set it to make file names clickable: each file is symlinked into <vault>/<folder> and opened in Obsidian. Empty = off.",
+      "default": ""
+    },
+    "obsidianFolder": {
+      "type": "string",
+      "title": "Folder inside the vault",
+      "description": "Where the symlinks go, relative to the vault root.",
+      "default": "_claude"
+    }
   }
 }
