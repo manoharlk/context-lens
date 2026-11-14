@@ -43,11 +43,19 @@ function vaultRel(path: string, folder: string): string {
 async function openInObsidian($: EngineInterface, path: string, vault: string, folder: string) {
   const v = vault.replace(/\/+$/, '')
   const rel = vaultRel(path, folder)
-  const link = `${v}/${rel}`
+  // Memory files link to each other, so link their whole folder; anything else, the file alone.
+  const m = path.match(/^(.*\/memory)\/[^/]+$/)
+  const src = m?.[1] ?? path
+  const link = `${v}/${vaultRel(src, folder)}`
   const parent = link.split('/').slice(0, -1).join('/')
   try {
+    if (m) {
+      // an older version linked single files into a real folder here: drop those links only
+      await $.process.run(['find', link, '-maxdepth', '1', '-type', 'l', '-delete'])
+      await $.process.run(['rmdir', link])
+    }
     await $.process.run(['mkdir', '-p', parent])
-    await $.process.run(['ln', '-sfn', path, link])
+    await $.process.run(['ln', '-sfn', src, link])
     const url = `obsidian://open?vault=${encodeURIComponent(base(v))}&file=${encodeURIComponent(rel)}`
     await $.process.run(['open', url])
   } catch {

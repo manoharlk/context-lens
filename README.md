@@ -11,7 +11,7 @@ Reopen with `/ctx-lens`.
 
 ## Open files in Obsidian (optional)
 
-Obsidian only opens files inside a vault. Set `obsidianVault` to a vault's absolute path and file names become clickable: the file is symlinked into `<vault>/<obsidianFolder>` (default `_claude`, dot-folders renamed since Obsidian hides them) and opened via `obsidian://`. Set it in `~/.claude/settings.json`:
+Obsidian only opens files inside a vault. Set `obsidianVault` to a vault's absolute path and file names become clickable: the file (or, for memory files, their whole folder so links between them resolve) is symlinked into `<vault>/<obsidianFolder>` (default `_claude`, dot-folders renamed since Obsidian hides them) and opened via `obsidian://`. Set it in `~/.claude/settings.json`:
 
 ```json
 "pluginConfigs": {

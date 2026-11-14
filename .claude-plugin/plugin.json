@@ -1,6 +1,6 @@
 {
   "name": "context-lens",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Pane: live context breakdown + memory/CLAUDE.md load tree + injected attachments",
   "types": "./types/index.d.ts",
   "userConfig": {
