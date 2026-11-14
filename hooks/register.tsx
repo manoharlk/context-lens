@@ -40,22 +40,40 @@ function vaultRel(path: string, folder: string): string {
   return [folder.replace(/^\/+|\/+$/g, ''), ...segs].filter(Boolean).join('/')
 }
 
+// Makes `link` a symlink to `src`. Obsidian only scans a linked folder when the
+// link appears at a path it does not know: one swapped in place keeps the old,
+// stale listing. So a link that is already right is left alone, and anything
+// else at the path is removed first, with time for Obsidian to notice it gone.
+async function ensureLink($: EngineInterface, src: string, link: string): Promise<boolean> {
+  const cur = await $.process.run(['readlink', link])
+  if (cur.exitCode === 0 && cur.stdout.trim() === src) return true
+  const isThere = cur.exitCode === 0 || (await $.process.run(['test', '-e', link])).exitCode === 0
+  if (isThere) {
+    if (cur.exitCode === 0) {
+      await $.process.run(['unlink', link])
+    } else {
+      // a real folder an older version filled with single-file links: drop only those links
+      await $.process.run(['find', link, '-maxdepth', '1', '-type', 'l', '-delete'])
+      if ((await $.process.run(['rmdir', link])).exitCode !== 0) return false
+    }
+    await $.clock.sleep(3000)
+  }
+  await $.process.run(['mkdir', '-p', link.split('/').slice(0, -1).join('/')])
+  if ((await $.process.run(['ln', '-s', src, link])).exitCode !== 0) return false
+  await $.clock.sleep(1500) // let Obsidian index it before the open
+  return true
+}
+
 async function openInObsidian($: EngineInterface, path: string, vault: string, folder: string) {
   const v = vault.replace(/\/+$/, '')
   const rel = vaultRel(path, folder)
   // Memory files link to each other, so link their whole folder; anything else, the file alone.
-  const m = path.match(/^(.*\/memory)\/[^/]+$/)
-  const src = m?.[1] ?? path
-  const link = `${v}/${vaultRel(src, folder)}`
-  const parent = link.split('/').slice(0, -1).join('/')
+  const src = path.match(/^(.*\/memory)\/[^/]+$/)?.[1] ?? path
   try {
-    if (m) {
-      // an older version linked single files into a real folder here: drop those links only
-      await $.process.run(['find', link, '-maxdepth', '1', '-type', 'l', '-delete'])
-      await $.process.run(['rmdir', link])
+    if (!(await ensureLink($, src, `${v}/${vaultRel(src, folder)}`))) {
+      $.ui.toast(`Couldn't link ${base(src)} into the vault: something else is at that path`)
+      return
     }
-    await $.process.run(['mkdir', '-p', parent])
-    await $.process.run(['ln', '-sfn', src, link])
     const url = `obsidian://open?vault=${encodeURIComponent(base(v))}&file=${encodeURIComponent(rel)}`
     await $.process.run(['open', url])
   } catch {
