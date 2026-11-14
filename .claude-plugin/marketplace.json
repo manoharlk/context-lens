@@ -1,0 +1,5 @@
+{
+  "name": "context-lens",
+  "owner": { "name": "manoharlk" },
+  "plugins": [{ "name": "context-lens", "source": "./" }]
+}
